@@ -34,16 +34,16 @@
     lightningExplode: false
   - type: MaximumDamage
     damage:
-      Blunt: [200, 10]
-      Slash: [200, 10]
-      Piercing: [200, 10]
-      Heat: [200, 10]
-      Cold: [200, 10]
-      Caustic: [200, 10]
-      Shock: [200, 10]
-      Poison: [100, 10]
-      Radiation: [100, 10]
-      Cellular: [100, 10]
+      Blunt: [200, 2]
+      Slash: [200, 2]
+      Piercing: [200, 2]
+      Heat: [200, 2]
+      Cold: [200, 2]
+      Caustic: [200, 2]
+      Shock: [200, 2]
+      Poison: [100, 2]
+      Radiation: [100, 2]
+      Cellular: [100, 2]
       Asphyxiation: [100, 0]
       Bloodloss: [0, 0]
   - type: UniqueWoundOnDamage
@@ -187,7 +187,7 @@
     linearFactor: -0.0025
     constantFactor: 0
   - type: HeartStopOnHighStrain
-    chance: 0.05
+    chance: 0.1
     threshold: 0.75
   - type: HeartrateAlerts
     strainAlert: HeartRate
@@ -210,14 +210,6 @@
     wound: WoundFracture
     woundProbability: 0.03
   - type: IVTarget
-  - type: HeartDamageOnDamage
-    thresholds:
-    - damageTypes: [Slash, Blunt, Piercing]
-      minimumTotalDamage: 200
-      conversionFactor: 0.6
-    - damageTypes: [Heat, Cold, Caustic, Shock]
-      minimumTotalDamage: 200
-      conversionFactor: 0.6
   - type: MessageOnHeartstop
     message: DefaultHeartstop
 
@@ -237,6 +229,7 @@
       x0: 3
   - type: BrainDamageOxygenation
     oxygenationDamageThresholds:
+      0.01: [1.0, [100, 5.0]]
       0.10: [1.0, [100, 0.75]]
       0.30: [0.7, [ 90, 0.75]]
       0.60: [0.6, [ 60, 0.75]]
@@ -246,7 +239,7 @@
       0.30: [0.6, 1]
     oxygenRegeneration: 1
     maxPassivelyHealableDamage: 30
-    damageHealing: 1
+    damageHealing: 5
     damageStageSize: 10
     damageStageMaximumHealing: 8
   - type: BrainDamageThresholds
@@ -284,14 +277,6 @@
     - HealthIconCritical2
     - HealthIconCritical1
     deadIcon: HealthIconBrainDead
-  - type: BrainDamageOnDamage
-    thresholds:
-    - damageTypes: [Slash, Blunt, Piercing]
-      minimumTotalDamage: 200
-      conversionFactor: 0.1
-    - damageTypes: [Heat, Cold, Caustic, Shock]
-      minimumTotalDamage: 200
-      conversionFactor: 0.01
   - type: BrainGaspThresholds
     messageThresholds:
       70: DefaultBraingasp
