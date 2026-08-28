@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Numerics;
 using Content.Shared._ES.Camera;
+using Content.Shared._ES.Movement;
 using Content.Shared.Alert;
 using Content.Shared.CCVar;
 using Content.Shared.Follower.Components;
@@ -467,13 +469,35 @@ namespace Content.Shared.Movement.Systems
 
             var buttons = entity.Comp.HeldMoveButtons;
 
-            if (enabled)
+            if (HasComp<DriftMovementComponent>(entity.Owner) && (bit == MoveButtons.Up || bit == MoveButtons.Down || bit == MoveButtons.Left || bit == MoveButtons.Right))
             {
-                buttons |= bit;
+                if (!enabled)
+                    return;
+
+                var opposite = bit switch
+                {
+                    MoveButtons.Up => MoveButtons.Down,
+                    MoveButtons.Down => MoveButtons.Up,
+                    MoveButtons.Left => MoveButtons.Right,
+                    MoveButtons.Right => MoveButtons.Left
+                };
+
+                if (HasFlag(buttons, opposite))
+                    buttons &= ~opposite;
+                else
+                    buttons |= bit;
             }
             else
             {
-                buttons &= ~bit;
+                if (enabled)
+                {
+                    buttons |= bit;
+                }
+                else
+                {
+                    buttons &= ~bit;
+                }
+
             }
 
             SetMoveInput(entity, buttons);
