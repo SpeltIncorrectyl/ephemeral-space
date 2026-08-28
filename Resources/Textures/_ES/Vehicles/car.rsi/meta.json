@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "size": {
+        "x": 32, 
+        "y": 32
+    },
+    "license": "CC-BY-NC-SA-3.0",
+    "copyright": "From Goonstation at https://github.com/goonstation/goonstation/commit/a5320d27fb61d838fb5b1d341602f9e5a8d2a71f",
+    "states": [
+        {
+            "name": "amogus", 
+            "directions": 4
+        }
+    ]
+}

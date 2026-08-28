@@ -1,0 +1,30 @@
+- type: entity
+  id: Car
+  name: Car
+  description: You do know how to drive, right?
+  components:
+  - type: Clickable
+  - type: Rotatable
+  - type: InteractionOutline
+  - type: Pullable
+  - type: Physics
+    bodyType: Dynamic
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,0.45"
+        density: 300
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+  - type: Sprite
+    sprite: _ES/Vehicles/car.rsi
+    state: amogus
+  - type: InteriorSeats
+    seats:
+    - driver
+    - passenger
