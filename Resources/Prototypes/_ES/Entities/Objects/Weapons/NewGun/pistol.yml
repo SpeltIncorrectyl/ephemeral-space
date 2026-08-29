@@ -1,0 +1,29 @@
+- type: entity
+  name: handgun
+  parent: BaseItem
+  id: NGPistol
+  description: A simple 9mm handgun.
+  components:
+  - type: Sprite
+    layers:
+    - state: base
+      map: ["enum.GunVisualLayers.Base"]
+    - state: mag-0
+      map: ["enum.GunVisualLayers.Mag"]
+  - type: Item
+    size: Small
+    shape:
+    - 0,0,1,0
+    - 0,1,0,1
+    storedOffset: 0,-4
+  - type: Tag
+    tags:
+    - Sidearm
+  - type: Clothing
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    quickEquip: false
+    slots:
+    - Belt
+  - type: Appearance
+  - type: ESCrosshairProvider
+  - type: NGTrigger
