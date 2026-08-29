@@ -15,6 +15,13 @@ public sealed partial class GunTriggerSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private ISharedPlayerManager _player = default!;
 
+    public override void Initialize()
+    {
+        base.Initialize();
+        SubscribeAllEvent<AttemptGunTriggerPulledMessage>(OnAttemptTriggerPulled);
+        SubscribeAllEvent<AttemptGunTriggerReleasedMessage>(OnAttemptTriggerReleased);
+    }
+
     /// <summary>
     /// Find the gun an entity is currently using, if any.
     /// This is what you would shoot with if you were in combat mode and clicked.
@@ -29,16 +36,34 @@ public sealed partial class GunTriggerSystem : EntitySystem
         return ev.Gun;
     }
 
-    [SubscribeLocalEvent]
-    [SubscribeNetworkEvent]
+    /// <summary>
+    /// Is this trigger pull or release request actually possible?
+    /// This is basic anti-cheat.
+    /// The client can't pull someone else's gun.
+    /// The gun in the event has to be the gun that is found from the user.
+    /// </summary>
+    private bool IsFeasible(EntityUid user, EntityUid gun, ICommonSession senderSession)
+    {
+        if (GetGun(user) is not { } foundGun)
+            return false;
+
+        if (foundGun.Owner != gun)
+            return false;
+
+        if (_player.TryGetSessionByEntity(user, out var session) && session != senderSession)
+            return false;
+
+        return true;
+    }
+
     private void OnAttemptTriggerPulled(AttemptGunTriggerPulledMessage msg, EntitySessionEventArgs args)
     {
         var ev1 = new AttemptTriggerPulledViaGunEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev1);
         var ev2 = new AttemptTriggerPulledViaUserEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
-        RaiseLocalEvent(GetEntity(msg.Gun), ref ev2);
+        RaiseLocalEvent(GetEntity(msg.User), ref ev2);
 
-        if (ev1.Cancelled || ev2.Cancelled)
+        if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession))
             return;
 
         var gunComp = Comp<NGTriggerComponent>(GetEntity(msg.Gun));
@@ -49,23 +74,14 @@ public sealed partial class GunTriggerSystem : EntitySystem
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev3);
     }
 
-    [SubscribeLocalEvent]
-    private void OnAttemptTriggerPulled(Entity<NGTriggerComponent> ent, ref AttemptTriggerPulledViaGunEvent args)
-    {
-        if (_player.TryGetSessionByEntity(args.User, out var session) && session != args.SenderSession || GetGun(args.User) != ent)
-            args.Cancelled = true;
-    }
-
-    [SubscribeLocalEvent]
-    [SubscribeNetworkEvent]
     private void OnAttemptTriggerReleased(AttemptGunTriggerReleasedMessage msg, EntitySessionEventArgs args)
     {
         var ev1 = new AttemptTriggerReleasedViaGunEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev1);
         var ev2 = new AttemptTriggerReleasedViaUserEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
-        RaiseLocalEvent(GetEntity(msg.Gun), ref ev2);
+        RaiseLocalEvent(GetEntity(msg.User), ref ev2);
 
-        if (ev1.Cancelled || ev2.Cancelled)
+        if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession))
             return;
 
         var gunComp = Comp<NGTriggerComponent>(GetEntity(msg.Gun));
@@ -74,13 +90,6 @@ public sealed partial class GunTriggerSystem : EntitySystem
         DirtyFields(GetEntity(msg.Gun), gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime)]);
         var ev3 = new TriggerReleasedEvent(GetEntity(msg.User), GetEntity(msg.Gun));
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev3);
-    }
-
-    [SubscribeLocalEvent]
-    private void OnAttemptTriggerReleased(Entity<NGTriggerComponent> ent, ref AttemptTriggerReleasedViaGunEvent args)
-    {
-        if (_player.TryGetSessionByEntity(args.User, out var session) && session != args.SenderSession || GetGun(args.User) != ent)
-            args.Cancelled = true;
     }
 }
 
@@ -140,10 +149,10 @@ public record struct AttemptTriggerReleasedViaGunEvent(EntityUid User, EntityUid
 /// Raised on the gun when the trigger is pulled.
 /// </summary>
 [ByRefEvent]
-public record struct TriggerPulledEvent(EntityUid User, EntityUid Gun);
+public record struct TriggerPulledEvent(EntityUid User, EntityUid Gun, bool Handled = false);
 
 /// <summary>
 /// Raised on the gun when the trigger is released.
 /// </summary>
 [ByRefEvent]
-public record struct TriggerReleasedEvent(EntityUid User, EntityUid Gun);
+public record struct TriggerReleasedEvent(EntityUid User, EntityUid Gun, bool Handled = false);

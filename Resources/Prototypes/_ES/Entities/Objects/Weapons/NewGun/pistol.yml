@@ -5,6 +5,7 @@
   description: A simple 9mm handgun.
   components:
   - type: Sprite
+    sprite: _ES/Objects/Weapons/Guns/9mm.rsi
     layers:
     - state: base
       map: ["enum.GunVisualLayers.Base"]
@@ -27,3 +28,4 @@
   - type: Appearance
   - type: ESCrosshairProvider
   - type: NGTrigger
+  - type: NGSemiAuto
