@@ -17,16 +17,16 @@ public sealed partial class NGTriggerComponent : Component
     public bool TriggerHeld;
 
     /// <summary>
-    /// If the trigger is held down, when was it held down?
-    /// </summary>
-    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoNetworkedField, AutoPausedField]
-    public TimeSpan? TriggerHeldTime;
-
-    /// <summary>
     /// If the trigger is held down, what is it shooting at?
     /// </summary>
     [DataField, AutoNetworkedField]
     public EntityCoordinates? Target;
+
+    /// <summary>
+    /// When was this component's information last updated?
+    /// </summary>
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoNetworkedField, AutoPausedField]
+    public TimeSpan? LastUpdateTime;
 
     /// <summary>
     /// Whether this gun is shot via the use key or the alt-use key.

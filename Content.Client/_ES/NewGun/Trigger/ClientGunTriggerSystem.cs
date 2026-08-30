@@ -45,11 +45,11 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
 
         if (!gun.Comp.TriggerHeld && _input.CmdStates.GetState(shootKey) == BoundKeyState.Down)
         {
-            RaisePredictiveEvent(new AttemptGunTriggerPulledMessage(GetNetEntity(user), GetNetCoordinates(GetTarget())));
+            RaisePredictiveEvent(new AttemptGunTriggerPulledMessage(GetNetCoordinates(GetTarget())));
         }
         else if (gun.Comp.TriggerHeld && _input.CmdStates.GetState(shootKey) == BoundKeyState.Up)
         {
-            RaisePredictiveEvent(new AttemptGunTriggerReleasedMessage(GetNetEntity(user)));
+            RaisePredictiveEvent(new AttemptGunTriggerReleasedMessage());
         }
     }
 
@@ -58,7 +58,10 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
         throw new NotImplementedException();
     }
 
-    private EntityCoordinates GetTarget()
+    /// <summary>
+    /// Find out where this client is aiming their gun at.
+    /// </summary>
+    public EntityCoordinates GetTarget()
     {
         throw new NotImplementedException();
     }
