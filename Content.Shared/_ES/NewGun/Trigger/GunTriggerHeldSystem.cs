@@ -11,7 +11,7 @@ public sealed partial class GunTriggerHeldSystem : EntitySystem
     [Dependency] private GunTriggerSystem _gun = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
 
-    [SubscribeLocalEvent]
+    [SubscribeLocalEvent(after: [typeof(GunTriggerInnateSystem)])]
     private void OnGetGun(Entity<HandsComponent> ent, ref GetGunEvent args)
     {
         if (args.Gun is not null)

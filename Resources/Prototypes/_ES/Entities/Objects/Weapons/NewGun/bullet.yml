@@ -1,0 +1,39 @@
+- type: entity
+  id: NGBullet
+  name: bullet
+  description: If you can see this you're probably dead!
+  components:
+  - type: FlyBySound
+  - type: Clickable
+  - type: Sprite
+    noRot: false
+    sprite: Objects/Weapons/Guns/Projectiles/projectiles2.rsi
+    layers:
+    - state: bullet
+      shader: unshaded
+  - type: Physics
+    bodyType: Dynamic
+  - type: TileFrictionModifier
+    modifier: 0
+  - type: Fixtures
+    fixtures:
+      projectile:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.1,-0.10,0.1,0.30"
+        hard: false
+        mask:
+        - Impassable
+        - BulletImpassable
+      # fly-by: &flybyfixture
+      #   shape: !type:PhysShapeCircle
+      #     radius: 1.5
+      #   layer:
+      #   - Impassable
+      #   - MidImpassable
+      #   - HighImpassable
+      #   - LowImpassable
+      #   hard: False
+  - type: TimedDespawn
+    lifetime: 10
+  - type: NGProjectile

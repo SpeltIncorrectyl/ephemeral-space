@@ -29,3 +29,8 @@
   - type: ESCrosshairProvider
   - type: NGTrigger
   - type: NGSemiAuto
+  - type: NGFirerate
+    firerate: 3.5
+  - type: NGProjectileShooter
+  - type: NGInnateProjectileShooter
+    proto: NGBullet

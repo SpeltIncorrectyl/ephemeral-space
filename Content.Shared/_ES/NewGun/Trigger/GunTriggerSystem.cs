@@ -28,6 +28,8 @@ public sealed partial class GunTriggerSystem : EntitySystem
     /// 
     /// The priorities are as follows:
     /// innate gun -> held gun
+    /// 
+    /// The reason the handlers for <see cref="GetGunEvent"/> are in their own tiny systems is so system ordering can be used to enforce the priority.
     /// </summary>
     public Entity<NGTriggerComponent>? GetGun(EntityUid user)
     {
@@ -58,9 +60,9 @@ public sealed partial class GunTriggerSystem : EntitySystem
 
     private void OnAttemptTriggerPulled(AttemptGunTriggerPulledMessage msg, EntitySessionEventArgs args)
     {
-        var ev1 = new AttemptTriggerPulledViaGunEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
+        var ev1 = new AttemptTriggerPulledViaGunEvent(GetEntity(msg.User), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev1);
-        var ev2 = new AttemptTriggerPulledViaUserEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
+        var ev2 = new AttemptTriggerPulledViaUserEvent(GetEntity(msg.User), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.User), ref ev2);
 
         if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession))
@@ -70,15 +72,15 @@ public sealed partial class GunTriggerSystem : EntitySystem
         gunComp.TriggerHeld = true;
         gunComp.TriggerHeldTime = _timing.CurTime;
         DirtyFields(GetEntity(msg.Gun), gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime)]);
-        var ev3 = new TriggerPulledEvent(GetEntity(msg.User), GetEntity(msg.Gun));
+        var ev3 = new TriggerPulledEvent(GetEntity(msg.User));
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev3);
     }
 
     private void OnAttemptTriggerReleased(AttemptGunTriggerReleasedMessage msg, EntitySessionEventArgs args)
     {
-        var ev1 = new AttemptTriggerReleasedViaGunEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
+        var ev1 = new AttemptTriggerReleasedViaGunEvent(GetEntity(msg.User), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev1);
-        var ev2 = new AttemptTriggerReleasedViaUserEvent(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession);
+        var ev2 = new AttemptTriggerReleasedViaUserEvent(GetEntity(msg.User), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.User), ref ev2);
 
         if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession))
@@ -88,7 +90,7 @@ public sealed partial class GunTriggerSystem : EntitySystem
         gunComp.TriggerHeld = false;
         gunComp.TriggerHeldTime = null;
         DirtyFields(GetEntity(msg.Gun), gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime)]);
-        var ev3 = new TriggerReleasedEvent(GetEntity(msg.User), GetEntity(msg.Gun));
+        var ev3 = new TriggerReleasedEvent(GetEntity(msg.User));
         RaiseLocalEvent(GetEntity(msg.Gun), ref ev3);
     }
 }
@@ -125,34 +127,34 @@ public sealed partial class AttemptGunTriggerReleasedMessage(NetEntity user, Net
 /// Cancellable event raised on the user to see if they can pull the trigger.
 /// </summary>
 [ByRefEvent]
-public record struct AttemptTriggerPulledViaUserEvent(EntityUid User, EntityUid Gun, ICommonSession SenderSession, bool Cancelled = false);
+public record struct AttemptTriggerPulledViaUserEvent(EntityUid Gun, ICommonSession SenderSession, bool Cancelled = false);
 
 /// <summary>
 /// Cancellable event raised on the gun to see if they can pull the trigger.
 /// </summary>
 [ByRefEvent]
-public record struct AttemptTriggerPulledViaGunEvent(EntityUid User, EntityUid Gun, ICommonSession SenderSession, bool Cancelled = false);
+public record struct AttemptTriggerPulledViaGunEvent(EntityUid User, ICommonSession SenderSession, bool Cancelled = false);
 
 /// <summary>
 /// Cancellable event raised on the user to see if they can release the trigger.
 /// </summary>
 [ByRefEvent]
-public record struct AttemptTriggerReleasedViaUserEvent(EntityUid User, EntityUid Gun, ICommonSession SenderSession, bool Cancelled = false);
+public record struct AttemptTriggerReleasedViaUserEvent(EntityUid Gun, ICommonSession SenderSession, bool Cancelled = false);
 
 /// <summary>
 /// Cancellable event raised on the gun to see if they can release the trigger.
 /// </summary>
 [ByRefEvent]
-public record struct AttemptTriggerReleasedViaGunEvent(EntityUid User, EntityUid Gun, ICommonSession SenderSession, bool Cancelled = false);
+public record struct AttemptTriggerReleasedViaGunEvent(EntityUid User, ICommonSession SenderSession, bool Cancelled = false);
 
 /// <summary>
 /// Raised on the gun when the trigger is pulled.
 /// </summary>
 [ByRefEvent]
-public record struct TriggerPulledEvent(EntityUid User, EntityUid Gun, bool Handled = false);
+public record struct TriggerPulledEvent(EntityUid User, bool Handled = false);
 
 /// <summary>
 /// Raised on the gun when the trigger is released.
 /// </summary>
 [ByRefEvent]
-public record struct TriggerReleasedEvent(EntityUid User, EntityUid Gun, bool Handled = false);
+public record struct TriggerReleasedEvent(EntityUid User, bool Handled = false);

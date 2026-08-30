@@ -11,13 +11,13 @@ public sealed partial class ShootSystem : EntitySystem
     /// </summary>
     public bool TryShoot(EntityUid gun, EntityUid user)
     {
-        var ev1 = new AttemptShootEvent(user, gun);
+        var ev1 = new AttemptShootEvent(user);
         RaiseLocalEvent(gun, ref ev1);
         if (ev1.Cancelled)
             return false;
         Log.Debug("shoot!");
-        var ev2 = new ShootEvent(user, gun);
-        RaiseLocalEvent(ref ev2);
+        var ev2 = new ShootEvent(user);
+        RaiseLocalEvent(gun, ref ev2);
         return true;
     }
 }
@@ -26,10 +26,10 @@ public sealed partial class ShootSystem : EntitySystem
 /// Raised on a gun when attempting to shoot.
 /// </summary>
 [ByRefEvent]
-public record struct AttemptShootEvent(EntityUid User, EntityUid Gun, bool Cancelled = false);
+public record struct AttemptShootEvent(EntityUid User, bool Cancelled = false);
 
 /// <summary>
 /// Raised on a gun when shooting.
 /// </summary>
 [ByRefEvent]
-public record struct ShootEvent(EntityUid User, EntityUid Gun);
+public record struct ShootEvent(EntityUid User);
