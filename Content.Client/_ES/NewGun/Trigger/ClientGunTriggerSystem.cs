@@ -1,8 +1,10 @@
+using Content.Shared._ES.NewGun;
 using Content.Shared._ES.NewGun.Trigger;
 using Content.Shared.CombatMode;
 using Robust.Client.GameObjects;
 using Robust.Client.Player;
 using Robust.Shared.Input;
+using Robust.Shared.Map;
 using Robust.Shared.Timing;
 
 namespace Content.Client._ES.NewGun.Trigger;
@@ -27,21 +29,37 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
         if (_player.LocalEntity is not { } user)
             return;
 
-        if (!TryComp<CombatModeComponent>(user, out var combatModeComp) || !combatModeComp.IsInCombatMode)
+        if (_trigger.GetGun(user) is not { } gun)
             return;
 
-        if (_trigger.GetGun(user) is not { } gun)
+        UpdateTrigger(user, gun);
+        UpdateTarget(user, gun);
+    }
+
+    private void UpdateTrigger(EntityUid user, Entity<NGTriggerComponent> gun)
+    {
+        if (!TryComp<CombatModeComponent>(user, out var combatModeComp) || !combatModeComp.IsInCombatMode)
             return;
 
         var shootKey = gun.Comp.UseKey ? EngineKeyFunctions.Use : EngineKeyFunctions.UseSecondary;
 
         if (!gun.Comp.TriggerHeld && _input.CmdStates.GetState(shootKey) == BoundKeyState.Down)
         {
-            RaisePredictiveEvent(new AttemptGunTriggerPulledMessage(GetNetEntity(user), GetNetEntity(gun)));
+            RaisePredictiveEvent(new AttemptGunTriggerPulledMessage(GetNetEntity(user), GetNetCoordinates(GetTarget())));
         }
         else if (gun.Comp.TriggerHeld && _input.CmdStates.GetState(shootKey) == BoundKeyState.Up)
         {
-            RaisePredictiveEvent(new AttemptGunTriggerReleasedMessage(GetNetEntity(user), GetNetEntity(gun)));
+            RaisePredictiveEvent(new AttemptGunTriggerReleasedMessage(GetNetEntity(user)));
         }
+    }
+
+    private void UpdateTarget(EntityUid user, Entity<NGTriggerComponent> gun)
+    {
+        throw new NotImplementedException();
+    }
+
+    private EntityCoordinates GetTarget()
+    {
+        throw new NotImplementedException();
     }
 }

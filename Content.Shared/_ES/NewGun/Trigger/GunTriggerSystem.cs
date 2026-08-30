@@ -1,5 +1,6 @@
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
+using Robust.Shared.Map;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Serialization;
@@ -42,16 +43,9 @@ public sealed partial class GunTriggerSystem : EntitySystem
     /// Is this trigger pull or release request actually possible?
     /// This is basic anti-cheat.
     /// The client can't pull someone else's gun.
-    /// The gun in the event has to be the gun that is found from the user.
     /// </summary>
-    private bool IsFeasible(EntityUid user, EntityUid gun, ICommonSession senderSession)
+    private bool IsFeasible(EntityUid user, ICommonSession senderSession)
     {
-        if (GetGun(user) is not { } foundGun)
-            return false;
-
-        if (foundGun.Owner != gun)
-            return false;
-
         if (_player.TryGetSessionByEntity(user, out var session) && session != senderSession)
             return false;
 
@@ -60,38 +54,46 @@ public sealed partial class GunTriggerSystem : EntitySystem
 
     private void OnAttemptTriggerPulled(AttemptGunTriggerPulledMessage msg, EntitySessionEventArgs args)
     {
+        if (GetGun(GetEntity(msg.User)) is not { } gun)
+            return;
+
         var ev1 = new AttemptTriggerPulledViaGunEvent(GetEntity(msg.User), args.SenderSession);
-        RaiseLocalEvent(GetEntity(msg.Gun), ref ev1);
+        RaiseLocalEvent(gun, ref ev1);
         var ev2 = new AttemptTriggerPulledViaUserEvent(GetEntity(msg.User), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.User), ref ev2);
 
-        if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession))
+        if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), args.SenderSession))
             return;
 
-        var gunComp = Comp<NGTriggerComponent>(GetEntity(msg.Gun));
+        var gunComp = Comp<NGTriggerComponent>(gun);
         gunComp.TriggerHeld = true;
         gunComp.TriggerHeldTime = _timing.CurTime;
-        DirtyFields(GetEntity(msg.Gun), gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime)]);
+        gunComp.Target = GetCoordinates(msg.Target);
+        DirtyFields(gun, gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime), nameof(NGTriggerComponent.Target)]);
         var ev3 = new TriggerPulledEvent(GetEntity(msg.User));
-        RaiseLocalEvent(GetEntity(msg.Gun), ref ev3);
+        RaiseLocalEvent(gun, ref ev3);
     }
 
     private void OnAttemptTriggerReleased(AttemptGunTriggerReleasedMessage msg, EntitySessionEventArgs args)
     {
+        if (GetGun(GetEntity(msg.User)) is not { } gun)
+            return;
+
         var ev1 = new AttemptTriggerReleasedViaGunEvent(GetEntity(msg.User), args.SenderSession);
-        RaiseLocalEvent(GetEntity(msg.Gun), ref ev1);
+        RaiseLocalEvent(gun, ref ev1);
         var ev2 = new AttemptTriggerReleasedViaUserEvent(GetEntity(msg.User), args.SenderSession);
         RaiseLocalEvent(GetEntity(msg.User), ref ev2);
 
-        if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), GetEntity(msg.Gun), args.SenderSession))
+        if (ev1.Cancelled || ev2.Cancelled || !IsFeasible(GetEntity(msg.User), args.SenderSession))
             return;
 
-        var gunComp = Comp<NGTriggerComponent>(GetEntity(msg.Gun));
+        var gunComp = Comp<NGTriggerComponent>(gun);
         gunComp.TriggerHeld = false;
         gunComp.TriggerHeldTime = null;
-        DirtyFields(GetEntity(msg.Gun), gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime)]);
+        gunComp.Target = null;
+        DirtyFields(gun, gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.TriggerHeldTime), nameof(NGTriggerComponent.Target)]);
         var ev3 = new TriggerReleasedEvent(GetEntity(msg.User));
-        RaiseLocalEvent(GetEntity(msg.Gun), ref ev3);
+        RaiseLocalEvent(gun, ref ev3);
     }
 }
 
@@ -107,20 +109,19 @@ public record struct GetGunEvent(EntityUid User, Entity<NGTriggerComponent>? Gun
 /// A client is attempting to pull the trigger on their gun.
 /// </summary>
 [Serializable, NetSerializable]
-public sealed partial class AttemptGunTriggerPulledMessage(NetEntity user, NetEntity gun) : EntityEventArgs
+public sealed partial class AttemptGunTriggerPulledMessage(NetEntity user, NetCoordinates target) : EntityEventArgs
 {
     public readonly NetEntity User = user;
-    public readonly NetEntity Gun = gun;
+    public readonly NetCoordinates Target = target;
 }
 
 /// <summary>
 /// A client is attempting to release the trigger on their gun.
 /// </summary>
 [Serializable, NetSerializable]
-public sealed partial class AttemptGunTriggerReleasedMessage(NetEntity user, NetEntity gun) : EntityEventArgs
+public sealed partial class AttemptGunTriggerReleasedMessage(NetEntity user) : EntityEventArgs
 {
     public readonly NetEntity User = user;
-    public readonly NetEntity Gun = gun;
 }
 
 /// <summary>

@@ -1,4 +1,5 @@
 using Robust.Shared.GameStates;
+using Robust.Shared.Map;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
 namespace Content.Shared._ES.NewGun;
@@ -20,6 +21,12 @@ public sealed partial class NGTriggerComponent : Component
     /// </summary>
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoNetworkedField, AutoPausedField]
     public TimeSpan? TriggerHeldTime;
+
+    /// <summary>
+    /// If the trigger is held down, what is it shooting at?
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public EntityCoordinates? Target;
 
     /// <summary>
     /// Whether this gun is shot via the use key or the alt-use key.
