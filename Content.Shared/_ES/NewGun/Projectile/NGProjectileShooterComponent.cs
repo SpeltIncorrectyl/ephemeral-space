@@ -7,7 +7,4 @@ namespace Content.Shared._ES.NewGun.Projectile;
 /// This is the most common thing. Other guns are things like hitscans.
 /// </summary>
 [RegisterComponent, NetworkedComponent]
-public sealed partial class NGProjectileShooterComponent : Component
-{
-
-}
+public sealed partial class NGProjectileShooterComponent : Component;

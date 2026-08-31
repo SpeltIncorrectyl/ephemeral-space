@@ -19,7 +19,7 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private InputSystem _input = default!;
-    [Dependency] private EyeManager _eye = default!;
+    [Dependency] private IEyeManager _eye = default!;
     [Dependency] private IInputManager _inputMan = default!;
     [Dependency] private TransformSystem _transform = default!;
     [Dependency] private FetchGunSystem _fetch = default!;
@@ -51,6 +51,9 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
             return;
 
         if (!TryComp<CombatModeComponent>(user, out var combatModeComp) || !combatModeComp.IsInCombatMode)
+            return;
+
+        if (!isShootKeyHeld)
             return;
 
         if (GetTarget() is not { } target)
