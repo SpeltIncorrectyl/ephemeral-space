@@ -1,4 +1,4 @@
-using Content.Shared._ES.NewGun.Shoot;
+using Content.Shared._ES.NewGun;
 using Content.Shared.Projectiles;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;

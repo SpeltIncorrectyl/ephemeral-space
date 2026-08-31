@@ -28,8 +28,7 @@
     - Belt
   - type: Appearance
   - type: ESCrosshairProvider
-  - type: NGTrigger
-  - type: NGFirerate
+  - type: NGGun
     firerate: 3.5
   - type: NGProjectileShooter
   - type: NGInnateProjectileSource
@@ -40,11 +39,13 @@
   parent: NGBasePistol
   id: NGSemiAutoPistol
   components:
-  - type: NGSemiAuto
+  - type: NGGun
+    semiAutomatic: true
 
 - type: entity
   name: automatic handgun
   parent: NGBasePistol
   id: NGAutoPistol
   components:
-  - type: NGAuto
+  - type: NGGun
+    semiAutomatic: false

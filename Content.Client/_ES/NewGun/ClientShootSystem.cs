@@ -1,5 +1,5 @@
 using Content.Shared._ES.NewGun;
-using Content.Shared._ES.NewGun.Trigger;
+using Content.Shared._ES.NewGun.Fetch;
 using Content.Shared.CombatMode;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
@@ -22,7 +22,8 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
     [Dependency] private EyeManager _eye = default!;
     [Dependency] private IInputManager _inputMan = default!;
     [Dependency] private TransformSystem _transform = default!;
-    [Dependency] private GunTriggerSystem _trigger = default!;
+    [Dependency] private FetchGunSystem _fetch = default!;
+    [Dependency] private ShootSystem _shoot = default!;
 
     public override void Update(float frameTime)
     {
@@ -34,7 +35,19 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
         if (_player.LocalEntity is not { } user)
             return;
 
-        if (_trigger.GetGun(user) is not { } gun)
+        if (_fetch.GetGun(user) is not { } gun)
+            return;
+
+        var shootKey = gun.Comp.PrimaryUseKey ? EngineKeyFunctions.Use : EngineKeyFunctions.UseSecondary;
+        var isShootKeyHeld = _input.CmdStates.GetState(shootKey) == BoundKeyState.Down;
+
+        var triggerComp = EnsureComp<NGTriggerComponent>(gun);
+        var isTriggerAlreadyHeld = triggerComp.TriggerHeld;
+        triggerComp.TriggerHeld = isShootKeyHeld;
+        if (gun.Comp.SemiAutomatic && isTriggerAlreadyHeld)
+            return;
+
+        if (_shoot.HasShotDelay(gun))
             return;
 
         if (!TryComp<CombatModeComponent>(user, out var combatModeComp) || !combatModeComp.IsInCombatMode)
@@ -43,16 +56,7 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
         if (GetTarget() is not { } target)
             return;
 
-        var shootKey = gun.Comp.UseKey ? EngineKeyFunctions.Use : EngineKeyFunctions.UseSecondary;
-
-        if (!gun.Comp.TriggerHeld && _input.CmdStates.GetState(shootKey) == BoundKeyState.Down)
-        {
-            RaisePredictiveEvent(new AttemptGunTriggerPulledMessage(GetNetCoordinates(target)));
-        }
-        else if (gun.Comp.TriggerHeld && _input.CmdStates.GetState(shootKey) == BoundKeyState.Up)
-        {
-            RaisePredictiveEvent(new AttemptGunTriggerReleasedMessage());
-        }
+        RaisePredictiveEvent(new RequestShootMessage(GetNetCoordinates(target)));
     }
 
     /// <summary>
