@@ -20,7 +20,7 @@ public sealed partial class NGTriggerComponent : Component
     /// If the trigger is held down, what is it shooting at?
     /// </summary>
     [DataField, AutoNetworkedField]
-    public EntityCoordinates? Target;
+    public NetCoordinates? Target;
 
     /// <summary>
     /// When was this component's information last updated?

@@ -1,8 +1,9 @@
 - type: entity
   name: handgun
   parent: BaseItem
-  id: NGPistol
+  id: NGBasePistol
   description: A simple 9mm handgun.
+  abstract: true
   components:
   - type: Sprite
     sprite: _ES/Objects/Weapons/Guns/9mm.rsi
@@ -28,9 +29,22 @@
   - type: Appearance
   - type: ESCrosshairProvider
   - type: NGTrigger
-  - type: NGSemiAuto
   - type: NGFirerate
     firerate: 3.5
   - type: NGProjectileShooter
-  - type: NGInnateProjectileShooter
+  - type: NGInnateProjectileSource
     proto: NGBullet
+
+- type: entity
+  name: semi-auto handgun
+  parent: NGBasePistol
+  id: NGSemiAutoPistol
+  components:
+  - type: NGSemiAuto
+
+- type: entity
+  name: automatic handgun
+  parent: NGBasePistol
+  id: NGAutoPistol
+  components:
+  - type: NGAuto

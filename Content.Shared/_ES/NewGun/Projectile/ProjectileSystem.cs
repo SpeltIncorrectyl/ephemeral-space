@@ -42,7 +42,7 @@ public sealed partial class ProjectileSystem : EntitySystem
     }
 
     [SubscribeLocalEvent]
-    private void OnGetProjectile(Entity<NGInnateProjectileShooterComponent> ent, ref GetProjectileEvent args)
+    private void OnGetProjectile(Entity<NGInnateProjectileSource> ent, ref GetProjectileEvent args)
     {
         args.ProjectileProto ??= ent.Comp.Proto;
     }

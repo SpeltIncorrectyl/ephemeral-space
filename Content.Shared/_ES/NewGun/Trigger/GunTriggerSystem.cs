@@ -58,7 +58,7 @@ public sealed partial class GunTriggerSystem : EntitySystem
         var gunComp = Comp<NGTriggerComponent>(gun);
         gunComp.TriggerHeld = true;
         gunComp.LastUpdateTime = _timing.CurTime;
-        gunComp.Target = GetCoordinates(msg.Target);
+        gunComp.Target = msg.Target;
         DirtyFields(gun, gunComp, null, [nameof(NGTriggerComponent.TriggerHeld), nameof(NGTriggerComponent.LastUpdateTime), nameof(NGTriggerComponent.Target)]);
         var ev3 = new TriggerPulledEvent(user);
         RaiseLocalEvent(gun, ref ev3);

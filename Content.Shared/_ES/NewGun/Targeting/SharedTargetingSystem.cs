@@ -1,4 +1,6 @@
+using Content.Shared._ES.NewGun.Trigger;
 using Robust.Shared.Map;
+using Robust.Shared.Player;
 using Robust.Shared.Serialization;
 using Robust.Shared.Timing;
 
@@ -9,7 +11,14 @@ namespace Content.Shared._ES.NewGun.Targeting;
 /// </summary>
 public abstract partial class SharedTargetingSystem : EntitySystem
 {
-    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] protected IGameTiming Timing = default!;
+    [Dependency] private GunTriggerSystem _trigger = default!;
+
+    public override void Initialize()
+    {
+        base.Initialize();
+        SubscribeAllEvent<UpdateGunTargetMessage>(OnUpdateTarget);
+    }
 
     /// <summary>
     /// Find out where a gun is pointed.
@@ -41,10 +50,23 @@ public abstract partial class SharedTargetingSystem : EntitySystem
         if (!gun.Comp.TriggerHeld)
             return null;
 
-        if (_timing.CurTime == gun.Comp.LastUpdateTime)
-            return gun.Comp.Target;
+        if (Timing.CurTime == gun.Comp.LastUpdateTime)
+            return GetCoordinates(gun.Comp.Target);
 
         return null;
+    }
+
+    private void OnUpdateTarget(UpdateGunTargetMessage msg, EntitySessionEventArgs args)
+    {
+        if (args.SenderSession.AttachedEntity is not { } player)
+            return;
+
+        if (_trigger.GetGun(player) is not { } gun)
+            return;
+
+        gun.Comp.Target = msg.Target;
+        gun.Comp.LastUpdateTime = Timing.CurTime;
+        DirtyFields(gun, gun.Comp, null, [nameof(NGTriggerComponent.Target), nameof(NGTriggerComponent.LastUpdateTime)]);
     }
 }
 

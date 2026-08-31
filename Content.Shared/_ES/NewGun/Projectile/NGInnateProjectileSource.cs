@@ -7,7 +7,7 @@ namespace Content.Shared._ES.NewGun.Projectile;
 /// This prototype for the projectile this gun shoots is found in this component.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
-public sealed partial class NGInnateProjectileShooterComponent : Component
+public sealed partial class NGInnateProjectileSource : Component
 {
     /// <summary>
     /// The prototype to be spawned.
