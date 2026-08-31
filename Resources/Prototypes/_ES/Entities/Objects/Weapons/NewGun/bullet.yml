@@ -37,3 +37,4 @@
   - type: TimedDespawn
     lifetime: 10
   - type: NGProjectile
+    speed: 20

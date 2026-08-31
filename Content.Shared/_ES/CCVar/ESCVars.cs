@@ -49,6 +49,12 @@ public sealed class ESCVars : CVars
         CVarDef.Create("es_arrivals.ftl_time", 60 * 4.5f, CVar.SERVER);
 
     /// <summary>
+    /// How close a bullet has to be on the server to its victim for the server to believe that client when it claims it managed to hit it.
+    /// </summary>
+    public static readonly CVarDef<float> ESProjectileLagCompRange =
+        CVarDef.Create("es_projectile_lag_comp_range", 0.6f, CVar.SERVER);
+
+    /// <summary>
     ///     Controls whether chat sanitization is enabled for individual users.
     /// </summary>
     public static readonly CVarDef<bool> UserChatSanitizationEnabled =
