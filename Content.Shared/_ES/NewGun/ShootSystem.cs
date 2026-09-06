@@ -1,9 +1,5 @@
-using System.Diagnostics;
 using Content.Shared._ES.NewGun.Fetch;
-using Content.Shared.GameTicking.Components;
 using Robust.Shared.Map;
-using Robust.Shared.Player;
-using Robust.Shared.Serialization;
 using Robust.Shared.Timing;
 
 namespace Content.Shared._ES.NewGun;
@@ -15,12 +11,6 @@ public sealed partial class ShootSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private FetchGunSystem _fetch = default!;
-
-    public override void Initialize()
-    {
-        base.Initialize();
-        SubscribeAllEvent<RequestShootMessage>(OnRequestShoot);
-    }
 
     /// <summary>
     /// Is this gun currently affected by shoot delay?
@@ -52,44 +42,36 @@ public sealed partial class ShootSystem : EntitySystem
         SetShootDelay(gun, delay);
     }
 
-    private void OnRequestShoot(RequestShootMessage msg, EntitySessionEventArgs args)
+    /// <summary>
+    /// See if you can shoot the gun, factoring in shoot delay and also has cancellable events so you can prevent shooting.
+    /// </summary>
+    public bool CanShoot(Entity<NGGunComponent> gun, EntityUid user)
     {
-        if (args.SenderSession.AttachedEntity is not { } user)
-            return;
-
-        if (_fetch.GetGun(user) is not { } gun)
-            return;
-
         if (HasShotDelay(gun))
-            return;
+            return false;
 
-        // set shoot delay now before we even know if the gun can fire
-        // otherwise if the shooting is not possible it would spam failures
-        SetShootDelay(gun);
+        var ev1 = new AttemptGunShootEvent(user);
+        RaiseLocalEvent(gun, ref ev1);
+        var ev2 = new AttemptUserShootEvent(gun);
+        RaiseLocalEvent(user, ref ev2);
 
-        var ev1 = new AttemptUserShootEvent(gun);
-        RaiseLocalEvent(user, ref ev1);
-        if (ev1.Cancelled)
-            return;
+        if (ev1.Cancelled || ev2.Cancelled)
+            return false;
 
-        var ev2 = new AttemptGunShootEvent(user);
-        RaiseLocalEvent(gun, ref ev2);
-        if (ev2.Cancelled)
-            return;
-
-        var ev3 = new ShootEvent(user, GetCoordinates(msg.Target));
-        RaiseLocalEvent(gun, ref ev3);
+        return true;
     }
-}
 
-/// <summary>
-/// A message sent by the client when it wants to shoot a gun.
-/// Only the target coordinates are sent, everything else can be worked out from the SenderSession.
-/// </summary>
-[Serializable, NetSerializable]
-public sealed partial class RequestShootMessage(NetCoordinates target) : EntityEventArgs
-{
-    public readonly NetCoordinates Target = target;
+
+    public void TryShoot(Entity<NGGunComponent> gun, EntityUid user, EntityCoordinates target)
+    {
+        if (!CanShoot(gun, user))
+            return;
+
+        var ev3 = new ShootEvent(user, target);
+        RaiseLocalEvent(gun, ref ev3);
+
+        SetShootDelay(gun);
+    }
 }
 
 /// <summary>

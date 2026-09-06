@@ -59,7 +59,9 @@ public sealed partial class ClientGunTriggerSystem : EntitySystem
         if (GetTarget() is not { } target)
             return;
 
-        RaisePredictiveEvent(new RequestShootMessage(GetNetCoordinates(target)));
+        // this is not networked, the ShootEvent will only be raised on the client
+        // the networking is to be done by whoever handles the event
+        _shoot.TryShoot(gun, user, target);
     }
 
     /// <summary>
