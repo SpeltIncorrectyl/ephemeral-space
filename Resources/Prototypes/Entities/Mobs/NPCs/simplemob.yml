@@ -22,7 +22,6 @@
     allowed:
     - Electrocution
     - TemporaryBlindness
-    - Pacified
     - Flashed
     - RadiationProtection
     - Adrenaline
@@ -88,7 +87,6 @@
     allowed:
     - Electrocution
     - TemporaryBlindness
-    - Pacified
     - Flashed
     - RadiationProtection
     - Adrenaline

@@ -1,6 +1,6 @@
-﻿using Content.Shared.Bed.Sleep;
+﻿using Content.Shared._ES.StatusEffects.Pacification;
+using Content.Shared.Bed.Sleep;
 using Content.Shared.Buckle.Components;
-using Content.Shared.CombatMode.Pacification;
 using Content.Shared.Damage;
 using Content.Shared.Damage.ForceSay;
 using Content.Shared.Damage.Systems;

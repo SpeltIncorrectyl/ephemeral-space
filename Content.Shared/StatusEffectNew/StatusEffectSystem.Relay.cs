@@ -12,6 +12,10 @@ using Content.Shared.Stunnable;
 using Robust.Shared.Player;
 // ES START
 using Content.Shared.Weapons.Melee.Events;
+using Content.Shared.Throwing;
+using Content.Shared.Interaction.Events;
+using Content.Shared.Weapons.Ranged.Events;
+using Content.Shared._ES.StatusEffects.Pacification;
 // ES END
 
 namespace Content.Shared.StatusEffectNew;
@@ -72,6 +76,10 @@ public sealed partial class StatusEffectsSystem
         SubscribeLocalEvent<StatusEffectContainerComponent, GetMeleeDamageEvent>(RefRelayStatusEffectEvent);
         SubscribeLocalEvent<StatusEffectContainerComponent, ESViewconeGetAngleModifierEvent>(RelayStatusEffectEvent);
         SubscribeLocalEvent<StatusEffectContainerComponent, ESSendChatMessageAttemptEvent>(RefRelayStatusEffectEvent);
+        SubscribeLocalEvent<StatusEffectContainerComponent, BeforeThrowEvent>(RefRelayStatusEffectEvent);
+        SubscribeLocalEvent<StatusEffectContainerComponent, AttackAttemptEvent>(RelayStatusEffectEvent);
+        SubscribeLocalEvent<StatusEffectContainerComponent, ShotAttemptedEvent>(RefRelayStatusEffectEvent);
+        SubscribeLocalEvent<StatusEffectContainerComponent, AttemptPacifiedAttackEvent>(RefRelayStatusEffectEvent);
         // ES END
     }
 

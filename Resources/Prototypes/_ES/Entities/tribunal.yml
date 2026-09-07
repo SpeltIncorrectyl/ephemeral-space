@@ -28,7 +28,7 @@
   - type: StatusEffectOnFixture
     fixture: fix1
     effects:
-    - ESStatusEffectCryoSickness
+    - StatusEffectPacified
     whitelist:
       components:
       - Body

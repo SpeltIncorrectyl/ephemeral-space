@@ -1,4 +1,4 @@
-using Content.Shared.CombatMode.Pacification;
+using Content.Shared._ES.StatusEffects.Pacification;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Events;
 
