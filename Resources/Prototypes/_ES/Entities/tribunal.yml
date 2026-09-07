@@ -9,6 +9,9 @@
     scale: "5,5"
   - type: Physics
     canCollide: true
+  - type: ForceProjectileCollision
+  - type: Reflect
+    reflectProb: 1
   - type: Fixtures
     fixtures:
       fix1:
@@ -18,13 +21,10 @@
         density: 15
         hard: false
         mask:
-        - Impassable
-        - HighImpassable
-        - LowImpassable
+        - MobMask
         layer:
-        - Impassable
-        - HighImpassable
-        - LowImpassable
+        - BulletImpassable
+        - Opaque
   - type: StatusEffectOnFixture
     fixture: fix1
     effects:

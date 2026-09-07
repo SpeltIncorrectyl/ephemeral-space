@@ -1,3 +1,4 @@
+using Content.Server._ES.Projectile;
 using Content.Server.Administration.Logs;
 using Content.Server.Destructible;
 using Content.Server.Effects;
@@ -38,7 +39,7 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
     private void OnStartCollide(EntityUid uid, ProjectileComponent component, ref StartCollideEvent args)
     {
         // This is so entities that shouldn't get a collision are ignored.
-        if (args.OurFixtureId != ProjectileFixture || !args.OtherFixture.Hard
+        if (args.OurFixtureId != ProjectileFixture || !args.OtherFixture.Hard && !HasComp<ForceProjectileCollisionComponent>(args.OtherEntity)
             || component.ProjectileSpent || component is { Weapon: null, OnlyCollideWhenShot: true })
             return;
 
