@@ -3,12 +3,33 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared.StatusEffectNew.Components;
 using Robust.Shared.Prototypes;
-using YamlDotNet.Core.Tokens;
 
 namespace Content.Shared.StatusEffectNew;
 
 public sealed partial class StatusEffectsSystem
 {
+    /// <summary>
+    /// Tries to add a status effect which lasts until it is manually removed.
+    /// </summary>
+    /// <param name="target">The target entity to which the effect should be added.</param>
+    /// <param name="effectProto">ProtoId of the status effect entity. Make sure it has StatusEffectComponent on it.</param>
+    /// <param name="delay">The delay of the effect. If a start time already exists, the closest time takes precedence. Leave null for the effect to be instant.</param>
+    /// <param name="statusEffect">The EntityUid of the status effect we have just created or null if it doesn't exist.</param>
+    /// <returns>False if it fails.</returns>
+    public bool TryAddIndefiniteStatusEffect(
+        EntityUid target,
+        EntProtoId effectProto,
+        out EntityUid? statusEffect,
+        TimeSpan? delay = null
+    )
+    {
+        if (!TryGetStatusEffect(target, effectProto, out statusEffect))
+            return TryAddStatusEffect(target, effectProto, out statusEffect, null, delay);
+
+        SetStatusEffectEndTime(statusEffect.Value, null);
+        return true;
+    }
+
     /// <summary>
     /// Increments duration of status effect by <see cref="duration"/>.
     /// Tries to add status effect if it is not yet present on entity.
