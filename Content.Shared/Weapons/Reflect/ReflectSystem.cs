@@ -175,7 +175,8 @@ public sealed partial class ReflectSystem : EntitySystem
         // Can probably be changed for prediction
         if (_netManager.IsServer)
         {
-            _popup.PopupEntity(Loc.GetString("reflect-shot"), user);
+            if (reflect.ShowPopup)
+                _popup.PopupEntity(Loc.GetString("reflect-shot"), user);
             _audio.PlayPvs(reflect.SoundOnReflect, user);
         }
     }

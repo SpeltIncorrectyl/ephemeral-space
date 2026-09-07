@@ -54,6 +54,13 @@ public sealed partial class ReflectComponent : Component
     /// </summary>
     [DataField]
     public SoundSpecifier? SoundOnReflect = new SoundPathSpecifier("/Audio/Weapons/Guns/Hits/laser_sear_wall.ogg", AudioParams.Default.WithVariation(0.05f));
+
+    /// <summary>
+    /// If to show a popup above this entity when a projectile is successfully reflected.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public bool ShowPopup = true;
+
 }
 
 /// <summary>

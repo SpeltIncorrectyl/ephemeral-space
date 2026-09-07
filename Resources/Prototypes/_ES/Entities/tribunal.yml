@@ -12,6 +12,7 @@
   - type: ForceProjectileCollision
   - type: Reflect
     reflectProb: 1
+    showPopup: false
   - type: Fixtures
     fixtures:
       fix1:
